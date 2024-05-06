@@ -52,7 +52,7 @@ function Function({ job, org }) {
 function dataFun(){
 
   
-  const [apiData,SetApiData]=useState([]);
+  const [apiData,SetApiData]=useState([{Key1:"abc"}]);
 
   const baseURL = `https://lovely-boot-production.up.railway.app`
 
@@ -74,32 +74,42 @@ function dataFun(){
 
   useEffect(()=>{
     console.log(apiData)
-    // console.log(state.isLogin)
+ 
   },[apiData])
   
 const row= apiData.map((eachData,index)=>{
 return {
-  name: <Author name={`${eachData.name}`}/>,
-  category: <Function job={`${eachData.category}`} />,
-  status: (
-    // <SoftBadge variant="gradient" badgeContent="online" color="success" size="xs" container />
-    <Function job={`${eachData.status}`} />
+  "Opportunity Title": <Author name={`${eachData["Opportunity Title"]}`}/>,
+  "Opportunity Number": (
+    <Function job={`${eachData["Opportunity Number"]}`} />
   ),
-  agency: (
+  "Opportunity Status": (
+    <Function job={`${eachData["Opportunity Status"]}`} />
+  ),
+  url: (
+    <Function job={`${eachData.url}`} />
+  ),
+  "Posted Date": (
     <SoftTypography variant="caption" color="secondary" fontWeight="medium">
-      {eachData.agency}
+      {eachData["Posted Date"]}
     </SoftTypography>
+  ),
+  "Close Date": <Function job={`${eachData["Close Date"]}`} />,
+  status: (
+    <Function job={`${eachData.status}`} />
   ),
 }
 })
 
   const authorsTableData = {
     columns: [
-      { name: "name", align: "left" },
-      { name: "category", align: "left" },
+      { name: "Opportunity Title", align: "left" },
+      { name: "Opportunity Number", align: "left" },
+      { name: "Opportunity Status", align: "center" },
+      { name: "url", align: "center" },
+      { name: "Posted Date", align: "center" },
+      { name: "Close Date", align: "center" },
       { name: "status", align: "center" },
-      { name: "agency", align: "center" },
-      // { name: "action", align: "center" },
     ],
   
     rows:row
