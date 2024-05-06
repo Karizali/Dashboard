@@ -41,7 +41,7 @@ function Yellowpages_table() {
   const { columns: prCols, rows: prRows } = projectsTableData;
   const baseURL = `https://lovely-boot-production.up.railway.app`
   const [startData, SetStartData] = useState([]);
-  const [statusBtn, SetStatusBtn] = useState([]);
+  const [statusBtn, SetStatusBtn] = useState({available:false});
 
   const startBtn = () => {
 
@@ -52,21 +52,17 @@ function Yellowpages_table() {
             'Content-Type': 'application/json'
           }
         })
-        SetStartData(response)
-        console.log(response.data)
+        SetStartData(response?.data)
+        console.log(response?.data)
       } catch (error) {
-        SetStartData(error)
-        console.error(error.data);
+        SetStartData(error?.data)
+        console.error(error?.data);
       }
 
     })()
   }
 
-  useEffect(() => {
-    if (startData?.data?.available == false) {
-      console.log(startData?.data?.available)
-    }
-  }, [startData])
+
 
 
 
@@ -79,8 +75,8 @@ function Yellowpages_table() {
         }
       })
       if (mounted) {
-        SetStatusBtn(response);
-        console.log(response.data)
+        SetStatusBtn(response?.data);
+        console.log(response?.data)
         return () => {
           mounted = false;
         };
@@ -88,7 +84,7 @@ function Yellowpages_table() {
       // SetStatusBtn(response)
     } catch (error) {
       if (mounted) {
-        SetStatusBtn(error);
+        SetStatusBtn(error?.data);
         console.log(error)
         return () => {
           mounted = false;
@@ -113,11 +109,11 @@ function Yellowpages_table() {
         <SoftBox mb={3}>
           <Card>
             <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-              <SoftTypography variant="h6">Authors table</SoftTypography>
+              <SoftTypography variant="h6">Yellow Pages table</SoftTypography>
             </SoftBox>
             <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-              <Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start</Button>
-              <SoftTypography variant="h6">Status</SoftTypography>
+              <div><Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start </Button>{!(statusBtn?.available)?<SoftTypography variant="h6">Not Available</SoftTypography>:<SoftTypography variant="h6">Available</SoftTypography>}</div>
+              <SoftTypography variant="h6">Status{`: ${statusBtn?.status}`}</SoftTypography>
               <SoftTypography variant="h6"></SoftTypography>
             </SoftBox>
             <SoftBox
@@ -134,23 +130,6 @@ function Yellowpages_table() {
             </SoftBox>
           </Card>
         </SoftBox>
-        {/* <Card>
-          <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-            <SoftTypography variant="h6">Projects table</SoftTypography>
-          </SoftBox>
-          <SoftBox
-            sx={{
-              "& .MuiTableRow-root:not(:last-child)": {
-                "& td": {
-                  borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                    `${borderWidth[1]} solid ${borderColor}`,
-                },
-              },
-            }}
-          >
-            <Table columns={prCols} rows={prRows} />
-          </SoftBox>
-        </Card> */}
       </SoftBox>
       <Footer />
     </DashboardLayout>

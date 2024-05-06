@@ -38,7 +38,7 @@ function Article_factory_table() {
 
 
   const [startData, SetStartData] = useState([]);
-  const [statusBtn, SetStatusBtn] = useState([]);
+  const [statusBtn, SetStatusBtn] = useState({available:false});
   const baseURL = `https://lovely-boot-production.up.railway.app`
   const { columns, rows } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
@@ -81,8 +81,8 @@ function Article_factory_table() {
         }
       })
       if (mounted) {
-        SetStatusBtn(response);
-        console.log(response.data)
+        SetStatusBtn(response?.data);
+        console.log(response?.data)
         return () => {
           mounted = false;
         };
@@ -90,7 +90,7 @@ function Article_factory_table() {
       // SetStatusBtn(response)
     } catch (error) {
       if (mounted) {
-        SetStatusBtn(error);
+        SetStatusBtn(error?.data);
         console.log(error)
         return () => {
           mounted = false;
@@ -120,8 +120,7 @@ function Article_factory_table() {
 
                 </SoftBox>
                 <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                  <Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start</Button>
-                  <SoftTypography variant="h6">Status</SoftTypography>
+                <div><Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start </Button>{!(statusBtn.available)?<SoftTypography variant="h6">Not Available</SoftTypography>:<SoftTypography variant="h6">Available</SoftTypography>}</div>                  <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
                   <SoftTypography variant="h6"></SoftTypography>
                 </SoftBox>
                 <SoftBox

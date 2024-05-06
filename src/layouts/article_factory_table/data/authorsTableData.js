@@ -15,6 +15,7 @@ import team4 from "assets/images/team-4.jpg";
 import button from "assets/theme/components/button";
 import data from "layouts/dashboard/components/Projects/data";
 import { Link } from "react-router-dom";
+import { Image, Style } from "@mui/icons-material";
 
 function Author({ image, name, email }) {
 
@@ -87,16 +88,13 @@ function dataFun() {
         title: <Author name={`${eachData?.title}`} />,
         categories: <Function job={`${eachData?.categories}`} />,
         status: (
-          // <SoftBadge variant="gradient" badgeContent="online" color="success" size="xs" container />
           <Function job={`${eachData?.status}`} />
         ),
         tags: (
           <Function job={`${eachData?.tags}`} />
         ),
         media_image: (
-          <SoftTypography variant="caption" color="secondary" fontWeight="medium">
-            <Link target="_blank">{eachData?.media_image}</Link>
-          </SoftTypography>
+          <img width={40} height={80} src={`${eachData?.media_image}` }/>
         ),
 
         article_url: (

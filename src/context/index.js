@@ -153,7 +153,7 @@ function reducer(state, action) {
       return { ...state, layout: action.value };
     }
     case "SET_LOGIN": {
-      return { ...state, isLogin: action.value };
+      return { ...state, dataFetch: action.value };
     }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
@@ -171,7 +171,7 @@ function SoftUIControllerProvider({ children }) {
     openConfigurator: false,
     direction: "ltr",
     layout: "dashboard",
-    isLogin: false, // Initializing isLogin here
+    dataFetch: false, // Initializing dataFetch here
   };
 
   const [controller, dispatch] = useReducer(reducer, initialState);
@@ -203,7 +203,7 @@ const setFixedNavbar = (dispatch, value) => dispatch({ type: "FIXED_NAVBAR", val
 const setOpenConfigurator = (dispatch, value) => dispatch({ type: "OPEN_CONFIGURATOR", value });
 const setDirection = (dispatch, value) => dispatch({ type: "DIRECTION", value });
 const setLayout = (dispatch, value) => dispatch({ type: "LAYOUT", value });
-const setLogin = (dispatch, value) => dispatch({ type: "SET_LOGIN", value }); // Action to set isLogin
+const setDataFetch = (dispatch, value) => dispatch({ type: "SET_DATAFETCH", value }); // Action to set dataFetch
 
 export {
   SoftUIControllerProvider,
@@ -216,5 +216,5 @@ export {
   setOpenConfigurator,
   setDirection,
   setLayout,
-  setLogin, 
+  setDataFetch, 
 };

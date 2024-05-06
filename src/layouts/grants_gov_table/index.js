@@ -76,8 +76,8 @@ function Grants_gov_table() {
         }
       })
       if (mounted) {
-        SetStatusBtn(response);
-        console.log(response.data)
+        SetStatusBtn(response?.data);
+        console.log(response?.data)
         return () => {
           mounted = false;
         };
@@ -85,7 +85,7 @@ function Grants_gov_table() {
       // SetStatusBtn(response)
     } catch (error) {
       if (mounted) {
-        SetStatusBtn(error);
+        SetStatusBtn(error?.data);
         console.log(error)
         return () => {
           mounted = false;
@@ -103,20 +103,6 @@ function Grants_gov_table() {
   }, []);
 
 
-  // useEffect(() => {
-  //   let mounted = true;
-  //   axios.get('demo/all/').then((res) => {
-  //     const allPosts = res.data;
-  //     if (mounted) {
-  //       setAppState({ loading: false, posts: allPosts });
-  //     }
-
-  //   });
-  //   return () => {
-  //     mounted = false;
-  //   };
-  // }, []);
-
   return (
 
     <DashboardLayout>
@@ -129,11 +115,10 @@ function Grants_gov_table() {
             </SoftBox>
             <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
               {(statusBtn.available == false) ?
-                <Button disabled onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start</Button>
-                :
+ <div><Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start </Button>{!(statusBtn.available)?<SoftTypography variant="h6">Not Available</SoftTypography>:<SoftTypography variant="h6">Available</SoftTypography>}</div>                :
                 <Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start</Button>
               }
-              <SoftTypography variant="h6">Status</SoftTypography>
+              <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
               <SoftTypography variant="h6"></SoftTypography>
             </SoftBox>
             <SoftBox
