@@ -40,6 +40,7 @@ import Dashboard from "layouts/dashboard";
 import Article_factory_table from "layouts/article_factory_table";
 import Grants_gov_table from "layouts/grants_gov_table";
 import Yellowpages_table from "layouts/yellowpages_table";
+import Procurement from "layouts/procurement";
 // import Billing from "layouts/billing";
 // import VirtualReality from "layouts/virtual-reality";
 // import RTL from "layouts/rtl";
@@ -93,6 +94,15 @@ const routes = [
     route: "/article_factory_table",
     icon: <Office size="12px" />,
     component: <Article_factory_table />,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Procurement",
+    key: "procurement_table",
+    route: "/procurement_table",
+    icon: <Office size="12px" />,
+    component: <Procurement />,
     noCollapse: true,
   },
   { type: "title", title: "Account Pages", key: "account-pages" },
