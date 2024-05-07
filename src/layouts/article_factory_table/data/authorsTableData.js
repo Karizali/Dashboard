@@ -6,7 +6,7 @@ import SoftAvatar from "components/SoftAvatar";
 import SoftBadge from "components/SoftBadge";
 import axios from "axios";
 import { useEffect, useState, useContext } from "react";
-import Loader from './../../../examples/loader/loader'
+import { useSoftUIController, setIsLoading } from './../../../context/index';
 
 // Images
 import team2 from "assets/images/team-2.jpg";
@@ -54,15 +54,18 @@ function Function({ job, org }) {
 }
 function dataFun() {
 
+  const [controller, dispatch] = useSoftUIController();
+  const { isLoading } = controller;
+
 
   const [apiData, SetApiData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
 
   const baseURL = `https://lovely-boot-production.up.railway.app`
 
   useEffect(() => {
     (async () => {
+      setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/article_factory/data`, {
           headers: {
@@ -70,9 +73,11 @@ function dataFun() {
           }
         })
         SetApiData(response.data)
+        setIsLoading(dispatch, false);
         setIsLoading(false)
         console.log("Article", response.data)
       } catch (error) {
+        setIsLoading(dispatch, false);
         console.error(error);
       }
     })()

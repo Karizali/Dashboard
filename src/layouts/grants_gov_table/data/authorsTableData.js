@@ -6,6 +6,7 @@ import SoftAvatar from "components/SoftAvatar";
 import SoftBadge from "components/SoftBadge";
 import axios from "axios";
 import { useEffect, useState,useContext } from "react";
+import { useSoftUIController, setIsLoading } from './../../../context/index';
 
 // Images
 import team2 from "assets/images/team-2.jpg";
@@ -51,6 +52,8 @@ function Function({ job, org }) {
 }
 function dataFun(){
 
+  const [controller, dispatch] = useSoftUIController();
+  const { isLoading } = controller;
   
   const [apiData,SetApiData]=useState([{Key1:"abc"}]);
 
@@ -58,6 +61,7 @@ function dataFun(){
 
   useEffect(() => {
     (async () => {
+      setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/grants_gov/data`, {
           headers: {
@@ -65,8 +69,10 @@ function dataFun(){
           }
         })
         SetApiData(response.data)
+        setIsLoading(dispatch, false);
         console.log(response)
       } catch (error) {
+        setIsLoading(dispatch, false);
         console.error(error);
       }
     })()

@@ -20,8 +20,12 @@ import Card from "@mui/material/Card";
 import SoftBox from "components/SoftBox";
 import SoftTypography from "components/SoftTypography";
 import { Button } from "@mui/material";
-import { useState,useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
+import Swal from 'sweetalert2'
+import Stack from '@mui/material/Stack';
+import Skeleton from '@mui/material/Skeleton';
+import { useSoftUIController, setIsLoading } from './../../context/index';
 
 // Soft UI Dashboard React examples
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -36,9 +40,12 @@ import projectsTableData from "layouts/article_factory_table/data/projectsTableD
 
 function Article_factory_table() {
 
+  const [controller, dispatch] = useSoftUIController();
+  const { isLoading } = controller;
 
   const [startData, SetStartData] = useState([]);
-  const [statusBtn, SetStatusBtn] = useState({available:false});
+  const [sendData, SetSendData] = useState([]);
+  const [statusBtn, SetStatusBtn] = useState({ available: false });
   const baseURL = `https://lovely-boot-production.up.railway.app`
   const { columns, rows } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
@@ -63,11 +70,35 @@ function Article_factory_table() {
     })()
   }
 
-  useEffect(() => {
-    if (startData?.data?.available == false) {
-      console.log(startData?.data?.available)
-    }
-  }, [startData])
+
+  const sendBtn = () => {
+
+    (async () => {
+      try {
+        const response = await axios.get(`${baseURL}/scraper/article_factory/send`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        SetSendData(response)
+        Swal.fire({
+          icon: "success",
+          title: "Send successfully",
+          text: response.data,
+        });
+        console.log(response.data)
+      } catch (error) {
+        SetSendData(error.data)
+        Swal.fire({
+          icon: "error",
+          title: "Error occur",
+          text: response.data,
+        });
+        console.error(error.data);
+      }
+
+    })()
+  }
 
 
 
@@ -83,63 +114,84 @@ function Article_factory_table() {
       if (mounted) {
         SetStatusBtn(response?.data);
         console.log(response?.data)
-        return () => {
-          mounted = false;
-        };
       }
       // SetStatusBtn(response)
     } catch (error) {
       if (mounted) {
         SetStatusBtn(error?.data);
         console.log(error)
-        return () => {
-          mounted = false;
-        };
       }
     }
+    return () => {
+      mounted = false;
+    };
 
   }
+
   useEffect(() => {
-    
-    const interval = setInterval(() => {
-      gettingStatus();
-    }, 1000)
-    return () => clearInterval(interval)
+    const getStatus = async () => {
+      await gettingStatus();
+      setTimeout(getStatus, 1000);
+    };
+
+    getStatus();
+
+    return () => {
+      clearTimeout(getStatus);
+    };
   }, []);
 
   return (
     <DashboardLayout>
       <DashboardNavbar />
-      <SoftBox py={3}>
-        <SoftBox mb={3}>
-          {
-            (rows) ?
-              <Card>
-                <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                  <SoftTypography variant="h6">Article factory table</SoftTypography>
+      {(!isLoading) ?
+        <SoftBox py={3}>
+          <SoftBox mb={3}>
+            {
+              (rows) ?
+                <Card>
+                  <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                    <SoftTypography variant="h6">Article factory table</SoftTypography>
 
-                </SoftBox>
-                <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                <div><Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start </Button>{!(statusBtn.available)?<SoftTypography variant="h6">Not Available</SoftTypography>:<SoftTypography variant="h6">Available</SoftTypography>}</div>                  <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
-                  <SoftTypography variant="h6"></SoftTypography>
-                </SoftBox>
-                <SoftBox
-                  sx={{
-                    "& .MuiTableRow-root:not(:last-child)": {
-                      "& td": {
-                        borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                          `${borderWidth[1]} solid ${borderColor}`,
+                  </SoftBox>
+                  <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                    <div>
+                      <Button onClick={startBtn} variant="outlined"
+                        style={{ color: "blue", cursor: "pointer" }}>Start </Button>
+                      {
+                        !(statusBtn.available)
+                          ?
+                          <SoftTypography variant="h6">Not Available</SoftTypography>
+                          :
+                          <SoftTypography variant="h6">Available</SoftTypography>
+                      }
+                    </div>
+                    <Button
+                      onClick={sendBtn}
+                      variant="outlined"
+                      style={{ color: "blue", cursor: "pointer" }}
+                    >Send
+                    </Button>
+                    <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
+                    <SoftTypography variant="h6"></SoftTypography>
+                  </SoftBox>
+                  <SoftBox
+                    sx={{
+                      "& .MuiTableRow-root:not(:last-child)": {
+                        "& td": {
+                          borderBottom: ({ borders: { borderWidth, borderColor } }) =>
+                            `${borderWidth[1]} solid ${borderColor}`,
+                        },
                       },
-                    },
-                  }}
-                >
-                  <Table columns={columns} rows={rows} />
-                </SoftBox>
-              </Card> :
-              <Loader />
-          }
-        </SoftBox>
-        {/* <Card>
+                    }}
+                  >
+                    <Table columns={columns} rows={rows} />
+                  </SoftBox>
+                </Card> :
+                <Loader />
+            }
+          </SoftBox>
+          {/* <Card>
           <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
             <SoftTypography variant="h6">Projects table</SoftTypography>
           </SoftBox>
@@ -156,7 +208,15 @@ function Article_factory_table() {
             <Table columns={prCols} rows={prRows} />
           </SoftBox>
         </Card> */}
-      </SoftBox>
+        </SoftBox>
+        :
+        <Stack spacing={2}>
+          <Skeleton variant="rectangular" height={100} />
+          <Skeleton variant="rectangular" height={100} />
+          <Skeleton variant="rectangular" height={100} />
+          <Skeleton variant="rounded" height={200} />
+        </Stack>
+      }
       <Footer />
     </DashboardLayout>
   );

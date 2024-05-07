@@ -7,6 +7,7 @@ import SoftBadge from "components/SoftBadge";
 import axios from "axios";
 import { useEffect, useState,useContext } from "react";
 import { Link } from "react-router-dom";
+import { useSoftUIController, setIsLoading } from './../../../context/index';
 
 // Images
 import team2 from "assets/images/team-2.jpg";
@@ -53,12 +54,16 @@ function Function({ job, org }) {
 function dataFun(){
 
   
+  const [controller, dispatch] = useSoftUIController();
+  const { isLoading } = controller;
+
   const [apiData,SetApiData]=useState([]);
 
   const baseURL = `https://lovely-boot-production.up.railway.app`
 
   useEffect(() => {
     (async () => {
+      setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/yellowpages/data`, {
           headers: {
@@ -66,8 +71,10 @@ function dataFun(){
           }
         })
         SetApiData(response.data)
+        setIsLoading(dispatch, false);
         console.log(response)
       } catch (error) {
+        setIsLoading(dispatch, false);
         console.error(error);
       }
     })()

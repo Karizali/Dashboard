@@ -5,7 +5,8 @@ import SoftTypography from "components/SoftTypography";
 import SoftAvatar from "components/SoftAvatar";
 import SoftBadge from "components/SoftBadge";
 import axios from "axios";
-import { useEffect, useState,useContext } from "react";
+import { useEffect, useState, useContext } from "react";
+import { useSoftUIController, setIsLoading } from './../../../context/index';
 
 // Images
 import team2 from "assets/images/team-2.jpg";
@@ -49,15 +50,17 @@ function Function({ job, org }) {
     </SoftBox>
   );
 }
-function dataFun(){
+function dataFun() {
+  const [controller, dispatch] = useSoftUIController();
+  const { isLoading } = controller;
 
-  
-  const [apiData,SetApiData]=useState([{Key1:"abc"}]);
+  const [apiData, SetApiData] = useState([{ Key1: "abc" }]);
 
   const baseURL = `https://lovely-boot-production.up.railway.app`
 
   useEffect(() => {
     (async () => {
+      setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/procurement/data`, {
           headers: {
@@ -65,41 +68,43 @@ function dataFun(){
           }
         })
         SetApiData(response.data)
+        setIsLoading(dispatch, false);
         console.log(response)
       } catch (error) {
+        setIsLoading(dispatch, false);
         console.error(error);
       }
     })()
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log(apiData)
- 
-  },[apiData])
-  
-const row= apiData.map((eachData,index)=>{
-return {
-  "Opportunity Title": <Author name={`${eachData["Opportunity Title"]}`}/>,
-  "Opportunity Number": (
-    <Function job={`${eachData["Opportunity Number"]}`} />
-  ),
-  "Opportunity Status": (
-    <Function job={`${eachData["Opportunity Status"]}`} />
-  ),
-  url: (
-    <Function job={`${eachData.url}`} />
-  ),
-  "Posted Date": (
-    <SoftTypography variant="caption" color="secondary" fontWeight="medium">
-      {eachData["Posted Date"]}
-    </SoftTypography>
-  ),
-  "Close Date": <Function job={`${eachData["Close Date"]}`} />,
-  status: (
-    <Function job={`${eachData.status}`} />
-  ),
-}
-})
+
+  }, [apiData])
+
+  const row = apiData.map((eachData, index) => {
+    return {
+      "Opportunity Title": <Author name={`${eachData["Opportunity Title"]}`} />,
+      "Opportunity Number": (
+        <Function job={`${eachData["Opportunity Number"]}`} />
+      ),
+      "Opportunity Status": (
+        <Function job={`${eachData["Opportunity Status"]}`} />
+      ),
+      url: (
+        <Function job={`${eachData.url}`} />
+      ),
+      "Posted Date": (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData["Posted Date"]}
+        </SoftTypography>
+      ),
+      "Close Date": <Function job={`${eachData["Close Date"]}`} />,
+      status: (
+        <Function job={`${eachData.status}`} />
+      ),
+    }
+  })
 
   const authorsTableData = {
     columns: [
@@ -111,8 +116,8 @@ return {
       { name: "Close Date", align: "center" },
       { name: "status", align: "center" },
     ],
-  
-    rows:row
+
+    rows: row
   };
   return authorsTableData
 }

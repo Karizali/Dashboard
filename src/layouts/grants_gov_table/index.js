@@ -21,6 +21,10 @@ import SoftBox from "components/SoftBox";
 import SoftTypography from "components/SoftTypography";
 import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
+import Swal from 'sweetalert2'
+import Skeleton from '@mui/material/Skeleton';
+import Stack from '@mui/material/Stack';
+import { useSoftUIController, setIsLoading } from './../../context/index';
 
 // Soft UI Dashboard React examples
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -35,8 +39,12 @@ import axios from "axios";
 
 function Grants_gov_table() {
 
+  const [controller, dispatch] = useSoftUIController();
+  const { isLoading } = controller;
+
   const [startData, SetStartData] = useState([]);
   const [statusBtn, SetStatusBtn] = useState([]);
+  const [sendData, SetSendData] = useState([]);
   const baseURL = `https://lovely-boot-production.up.railway.app`
   const { columns, rows } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
@@ -51,20 +59,46 @@ function Grants_gov_table() {
           }
         })
         SetStartData(response)
+        Swal.fire({
+          icon: "success",
+          title: "Send successfully",
+          text: response.data,
+        });
         console.log(response.data)
       } catch (error) {
-        SetStartData(error)
+        SetSendData(error.data)
+        Swal.fire({
+          icon: "error",
+          title: "Error occur",
+          text: response.data,
+        });
         console.error(error.data);
       }
 
     })()
   }
 
-  useEffect(() => {
-    if (startData?.data?.available == false) {
-      console.log(startData?.data?.available)
-    }
-  }, [startData])
+  const sendBtn = () => {
+
+    (async () => {
+      try {
+        const response = await axios.get(`${baseURL}/scraper/grants_gov/send`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        SetSendData(response)
+        console.log(response.data)
+      } catch (error) {
+        SetSendData(error.data)
+        console.error(error.data);
+      }
+
+    })()
+  }
+
+
+
 
 
   const gettingStatus = async () => {
@@ -78,28 +112,30 @@ function Grants_gov_table() {
       if (mounted) {
         SetStatusBtn(response?.data);
         console.log(response?.data)
-        return () => {
-          mounted = false;
-        };
       }
       // SetStatusBtn(response)
     } catch (error) {
       if (mounted) {
         SetStatusBtn(error?.data);
         console.log(error)
-        return () => {
-          mounted = false;
-        };
       }
     }
+    return () => {
+      mounted = false;
+    };
 
   }
+
   useEffect(() => {
-    
-    const interval = setInterval(() => {
-      gettingStatus();
-    }, 1000)
-    return () => clearInterval(interval)
+    const getStatus = async () => {
+      await gettingStatus();
+      setTimeout(getStatus, 1000);
+    };
+
+    getStatus();
+    return () => {
+      clearTimeout(getStatus);
+    };
   }, []);
 
 
@@ -107,35 +143,61 @@ function Grants_gov_table() {
 
     <DashboardLayout>
       <DashboardNavbar />
-      <SoftBox py={3}>
-        <SoftBox mb={3}>
-          <Card>
-            <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-              <SoftTypography variant="h4">Grants_gov table</SoftTypography>
+      {
+        (!isLoading) ?
+          <SoftBox py={3}>
+            <SoftBox mb={3}>
+              <Card>
+                <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                  <SoftTypography variant="h4">Grants_gov table</SoftTypography>
+                </SoftBox>
+                <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                  {
+                    (statusBtn.available == false)
+                      ?
+                      <div>
+                        <Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
+                        {
+                          !(statusBtn.available) ?
+                            <SoftTypography variant="h6">Not Available</SoftTypography>
+                            :
+                            <SoftTypography variant="h6">Available</SoftTypography>
+                        }
+                      </div>
+                      :
+                      <Button
+                        onClick={startBtn} variant="outlined"
+                        style={{ color: "blue", cursor: "pointer" }}
+                      >Start
+                      </Button>
+                  }
+
+                  <Button
+                    onClick={sendBtn}
+                    variant="outlined"
+                    style={{ color: "blue", cursor: "pointer" }}
+                  >Send
+                  </Button>
+
+                  <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
+                  <SoftTypography variant="h6"></SoftTypography>
+                </SoftBox>
+                <SoftBox
+                  sx={{
+                    "& .MuiTableRow-root:not(:last-child)": {
+                      "& td": {
+                        borderBottom: ({ borders: { borderWidth, borderColor } }) =>
+                          `${borderWidth[1]} solid ${borderColor}`,
+                      },
+                    },
+                  }}
+                >
+                  <Table columns={columns} rows={rows} />
+                </SoftBox>
+              </Card>
             </SoftBox>
-            <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-              {(statusBtn.available == false) ?
- <div><Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start </Button>{!(statusBtn.available)?<SoftTypography variant="h6">Not Available</SoftTypography>:<SoftTypography variant="h6">Available</SoftTypography>}</div>                :
-                <Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start</Button>
-              }
-              <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
-              <SoftTypography variant="h6"></SoftTypography>
-            </SoftBox>
-            <SoftBox
-              sx={{
-                "& .MuiTableRow-root:not(:last-child)": {
-                  "& td": {
-                    borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                      `${borderWidth[1]} solid ${borderColor}`,
-                  },
-                },
-              }}
-            >
-              <Table columns={columns} rows={rows} />
-            </SoftBox>
-          </Card>
-        </SoftBox>
-        {/* <Card>
+            {/* <Card>
           <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
             <SoftTypography variant="h6">Projects table</SoftTypography>
           </SoftBox>
@@ -152,7 +214,15 @@ function Grants_gov_table() {
             <Table columns={prCols} rows={prRows} />
           </SoftBox>
         </Card> */}
-      </SoftBox>
+          </SoftBox> :
+
+          <Stack spacing={2}>
+            <Skeleton variant="rectangular" height={100}  />
+            <Skeleton variant="rectangular" height={100}  />
+            <Skeleton variant="rectangular" height={100}  />
+            <Skeleton variant="rounded"  height={200} />
+          </Stack>
+      }
       <Footer />
     </DashboardLayout>
   );
