@@ -43,40 +43,32 @@ function Grants_gov_table() {
 
   const [controller, dispatch] = useSoftUIController();
   const { isLoading } = controller;
+  const baseURL = `https://lovely-boot-production.up.railway.app`
 
   const [startData, SetStartData] = useState([]);
   const [statusBtn, SetStatusBtn] = useState([]);
   const [sendData, SetSendData] = useState([]);
-  const baseURL = `https://lovely-boot-production.up.railway.app`
-  const { columns, rows, paginationData } = dataFun();
+  const [deleteData, SetDeleteData] = useState([]);
+
+  const { columns, rows, paginationData, SetIsDeleteOrStart, isDeleteOrStart } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
   const startBtn = () => {
-
     (async () => {
-      try {
-        const response = await axios.get(`${baseURL}/scraper/grants_gov/start`, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        SetStartData(response)
-        // Swal.fire({
-        //   icon: "success",
-        //   title: "Start successfully",
-        //   text: response.data.status,
-        // });
-        console.log("Start "+response.data)
-      } catch (error) {
-        SetSendData(error.data)
-        // Swal.fire({
-        //   icon: "error",
-        //   title: "Error occur",
-        //   text: response.data,
-        // });
-        console.error(error.data);
+      if (statusBtn.available) {
+        try {
+          const response = await axios.get(`${baseURL}/scraper/grants_gov/start`, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          SetStartData(response)
+          SetIsDeleteOrStart(!isDeleteOrStart);
+        } catch (error) {
+          SetSendData(error.data)
+          console.error(error.data);
+        }
       }
-
     })()
   }
 
@@ -113,7 +105,38 @@ function Grants_gov_table() {
     })()
   }
 
+  const deleteBtn = () => {
 
+    (async () => {
+      setIsLoading(dispatch, true);
+      try {
+        const response = await axios.get(`${baseURL}/scraper/grants_gov/clean`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        SetDeleteData(response)
+        Swal.fire({
+          icon: "success",
+          title: "Delete Response",
+          text: response.data.status,
+        });
+        setIsLoading(dispatch, false);
+        SetIsDeleteOrStart(!isDeleteOrStart);
+      } catch (error) {
+        SetDeleteData(error.data)
+        Swal.fire({
+          icon: "error",
+          title: "Error occur",
+          text: error.data,
+        });
+        setIsLoading(dispatch, false);
+        SetIsDeleteOrStart(!isDeleteOrStart);
+        console.error(error.data);
+      }
+
+    })()
+  }
 
 
 
@@ -127,6 +150,9 @@ function Grants_gov_table() {
       })
       if (mounted) {
         SetStatusBtn(response?.data);
+        // if (statusBtn != response?.data) {
+        //   SetIsDeleteOrStart(!isDeleteOrStart)
+        // }
         console.log(response?.data)
       }
       // SetStatusBtn(response)
@@ -167,30 +193,39 @@ function Grants_gov_table() {
                 <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
                   <SoftTypography variant="h4">Grants_gov table</SoftTypography>
                 </SoftBox>
-                <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                    <div>
-                      <Button onClick={startBtn} variant="outlined"
-                        style={{ color: "blue", cursor: "pointer" }}>Start </Button>
-                      {
-                        !(statusBtn.available)
-                          ?
-                          <SoftTypography variant="h6">Not Available</SoftTypography>
-                          :
-                          <SoftTypography variant="h6">Available</SoftTypography>
-                      }
-                    </div>
-                    <div>
-                      <Button
-                        onClick={sendBtn}
-                        variant="outlined"
-                        style={{ color: "blue", cursor: "pointer",marginBottom:30 }}
-                      >Send
-                      </Button>
-                      <SoftTypography variant="h6" ></SoftTypography>
-                    </div>
-                    <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
-                    <SoftTypography variant="h6"></SoftTypography>
-                  </SoftBox>
+                <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+
+                  <Button
+                    onClick={startBtn}
+                    variant="outlined" size="medium"
+                    style={{ color: "blue", cursor: "pointer" }}>Start
+                  </Button>
+
+                  <Button
+                    onClick={sendBtn}
+                    variant="outlined"
+                    size="medium"
+                    style={{ color: "blue", cursor: "pointer" }}
+                  >Send
+                  </Button>
+                  <Button
+                    onClick={deleteBtn}
+                    variant="outlined"
+                    size="medium"
+                    style={{ color: "blue", cursor: "pointer" }}
+                  >Delete
+                  </Button>
+                  <SoftTypography variant="h5">Status{`: ${statusBtn?.status}`}</SoftTypography>
+
+                </SoftBox>
+                <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+                  {
+                    !(statusBtn?.available) ?
+                      <SoftTypography variant="h7" color="error">Not Available</SoftTypography> :
+                      <SoftTypography variant="h7" color="success">Available</SoftTypography>
+                  }
+
+                </SoftBox>
                 <SoftBox
                   sx={{
                     "& .MuiTableRow-root:not(:last-child)": {

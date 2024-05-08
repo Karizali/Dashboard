@@ -49,29 +49,31 @@ function Yellowpages_table() {
   const [controller, dispatch] = useSoftUIController();
   const { isLoading } = controller;
 
-  const { columns, rows,paginationData  } = dataFun();
+  const { columns, rows, paginationData, SetIsDeleteOrStart, isDeleteOrStart } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
   const baseURL = `https://lovely-boot-production.up.railway.app`
   const [startData, SetStartData] = useState([]);
   const [sendData, SetSendData] = useState([]);
+  const [deleteData, SetDeleteData] = useState([]);
   const [statusBtn, SetStatusBtn] = useState({ available: false });
 
   const startBtn = () => {
 
     (async () => {
-      try {
-        const response = await axios.get(`${baseURL}/scraper/yellowpages/start`, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        SetStartData(response?.data)
-        console.log(response?.data)
-      } catch (error) {
-        SetStartData(error?.data)
-        console.error(error?.data);
+      if (statusBtn.available) {
+        try {
+          const response = await axios.get(`${baseURL}/scraper/yellowpages/start`, {
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+          SetStartData(response?.data)
+          SetIsDeleteOrStart(!isDeleteOrStart);
+        } catch (error) {
+          SetStartData(error?.data)
+          console.error(error?.data);
+        }
       }
-
     })()
   }
 
@@ -106,6 +108,38 @@ function Yellowpages_table() {
 
     })()
   }
+  const deleteBtn = () => {
+
+    (async () => {
+      setIsLoading(dispatch, true);
+      try {
+        const response = await axios.get(`${baseURL}/scraper/yellowpages/clean`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        SetDeleteData(response)
+        Swal.fire({
+          icon: "success",
+          title: "Delete Responde",
+          text: response.data.status,
+        });
+        setIsLoading(dispatch, false);
+        SetIsDeleteOrStart(!isDeleteOrStart);
+      } catch (error) {
+        SetDeleteData(error.data)
+        Swal.fire({
+          icon: "error",
+          title: "Error occur",
+          text: error.data,
+        });
+        setIsLoading(dispatch, false);
+        SetIsDeleteOrStart(!isDeleteOrStart);
+        console.error(error?.data);
+      }
+
+    })()
+  }
 
 
 
@@ -119,6 +153,9 @@ function Yellowpages_table() {
       })
       if (mounted) {
         SetStatusBtn(response?.data);
+        // if(statusBtn!=response?.data){
+        //   SetIsDeleteOrStart(!isDeleteOrStart)
+        // }
         console.log(response?.data)
       }
       // SetStatusBtn(response)
@@ -157,24 +194,38 @@ function Yellowpages_table() {
               <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
                 <SoftTypography variant="h6">Yellow Pages table</SoftTypography>
               </SoftBox>
-              <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                <div>
-                  <Button onClick={startBtn} variant="outlined"
-                    style={{ color: "blue", cursor: "pointer" }}>Start </Button>
-                  {
-                    !(statusBtn?.available) ?
-                      <SoftTypography variant="h6">Not Available</SoftTypography> :
-                      <SoftTypography variant="h6">Available</SoftTypography>
-                  }
-                </div>
+              <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+
+                <Button
+                  onClick={startBtn}
+                  variant="outlined" size="medium"
+                  style={{ color: "blue", cursor: "pointer" }}>Start
+                </Button>
+
                 <Button
                   onClick={sendBtn}
                   variant="outlined"
-                  style={{ color: "blue", cursor: "pointer",marginBottom:30  }}
+                  size="medium"
+                  style={{ color: "blue", cursor: "pointer" }}
                 >Send
                 </Button>
-                <SoftTypography variant="h6">Status{`: ${statusBtn?.status}`}</SoftTypography>
-                <SoftTypography variant="h6"></SoftTypography>
+                <Button
+                  onClick={deleteBtn}
+                  variant="outlined"
+                  size="medium"
+                  style={{ color: "blue", cursor: "pointer" }}
+                >Delete
+                </Button>
+                <SoftTypography variant="h5">Status{`: ${statusBtn?.status}`}</SoftTypography>
+
+              </SoftBox>
+              <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+                {
+                  !(statusBtn?.available) ?
+                    <SoftTypography variant="h7" color="error">Not Available</SoftTypography> :
+                    <SoftTypography variant="h7" color="success">Available</SoftTypography>
+                }
+
               </SoftBox>
               <SoftBox
                 sx={{
@@ -186,7 +237,7 @@ function Yellowpages_table() {
                   },
                 }}
               >
-                <Table columns={columns} rows={rows} />
+                {(!columns) ? "No Data" : <Table columns={columns} rows={rows} />}
               </SoftBox>
             </Card>
           </SoftBox>

@@ -59,6 +59,7 @@ function dataFun() {
   const { isLoading } = controller;
 
   const [apiData, SetApiData] = useState([]);
+  const [isDeleteOrStart, SetIsDeleteOrStart] = useState(false);
   const [totalPages, SetTotalPages] = useState(10);
   const [pageAndLimit, SetPageAndLimit] = useState({
     page: 1,
@@ -87,7 +88,7 @@ function dataFun() {
         console.error(error);
       }
     })()
-  }, [pageAndLimit]);
+  }, [pageAndLimit, isDeleteOrStart]);
 
   useEffect(() => {
     console.log(apiData)
@@ -130,7 +131,9 @@ function dataFun() {
       SetPageAndLimit,
       pageAndLimit,
       totalPages
-    }
+    },
+    SetIsDeleteOrStart,
+    isDeleteOrStart
   };
   return authorsTableData
 }

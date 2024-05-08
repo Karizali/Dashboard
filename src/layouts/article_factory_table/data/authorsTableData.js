@@ -59,6 +59,7 @@ function dataFun() {
   const { isLoading } = controller;
 
   const [apiData, SetApiData] = useState([]);
+  const [isDeleteOrStart, SetIsDeleteOrStart] = useState(false);
   const [totalPages, SetTotalPages] = useState(10);
   const [pageAndLimit, SetPageAndLimit] = useState({
     page: 1,
@@ -69,7 +70,6 @@ function dataFun() {
 
   useEffect(() => {
     (async () => {
-      // console.log(pageAndLimit.page,pageAndLimit.limit)
       setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/article_factory/paginate?page=${pageAndLimit.page}&limit=${pageAndLimit.limit}`, {
@@ -87,12 +87,9 @@ function dataFun() {
         console.error(error);
       }
     })()
-  }, [pageAndLimit]);
+  }, [pageAndLimit,isDeleteOrStart]);
 
-  useEffect(() => {
-    console.log(apiData)
-    console.log(totalPages)
-  }, [apiData])
+
 
 
   const row = apiData.map((eachData, index) => {
@@ -146,8 +143,10 @@ function dataFun() {
     {
       SetPageAndLimit,
       pageAndLimit,
-      totalPages
-    }
+      totalPages,
+    },
+    SetIsDeleteOrStart,
+    isDeleteOrStart
   };
   return authorsTableData
 }
