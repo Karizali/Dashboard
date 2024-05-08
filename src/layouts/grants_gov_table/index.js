@@ -25,6 +25,8 @@ import Swal from 'sweetalert2'
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
 import { useSoftUIController, setIsLoading } from './../../context/index';
+import PaginationControlled from "./../../components/Pagination";
+import PropTypes from 'prop-types';
 
 // Soft UI Dashboard React examples
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -46,7 +48,7 @@ function Grants_gov_table() {
   const [statusBtn, SetStatusBtn] = useState([]);
   const [sendData, SetSendData] = useState([]);
   const baseURL = `https://lovely-boot-production.up.railway.app`
-  const { columns, rows } = dataFun();
+  const { columns, rows,paginationData } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
   const startBtn = () => {
@@ -197,35 +199,28 @@ function Grants_gov_table() {
                 </SoftBox>
               </Card>
             </SoftBox>
-            {/* <Card>
-          <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-            <SoftTypography variant="h6">Projects table</SoftTypography>
-          </SoftBox>
-          <SoftBox
-            sx={{
-              "& .MuiTableRow-root:not(:last-child)": {
-                "& td": {
-                  borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                    `${borderWidth[1]} solid ${borderColor}`,
-                },
-              },
-            }}
-          >
-            <Table columns={prCols} rows={prRows} />
-          </SoftBox>
-        </Card> */}
+            <SoftBox display="flex" justifyContent="center" alignItems="center">
+              <Stack spacing={2}>
+                <PaginationControlled paginationData={paginationData} />
+              </Stack>
+            </SoftBox>
           </SoftBox> :
 
           <Stack spacing={2}>
-            <Skeleton variant="rectangular" height={100}  />
-            <Skeleton variant="rectangular" height={100}  />
-            <Skeleton variant="rectangular" height={100}  />
-            <Skeleton variant="rounded"  height={200} />
+            <Skeleton variant="rectangular" height={100} />
+            <Skeleton variant="rectangular" height={100} />
+            <Skeleton variant="rectangular" height={100} />
+            <Skeleton variant="rounded" height={200} />
           </Stack>
       }
       <Footer />
     </DashboardLayout>
   );
 }
+
+
+Grants_gov_table.propTypes = {
+  paginationData: PropTypes.object.isRequired
+};
 
 export default Grants_gov_table;

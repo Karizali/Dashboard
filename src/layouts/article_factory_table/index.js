@@ -26,6 +26,8 @@ import Swal from 'sweetalert2'
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import { useSoftUIController, setIsLoading } from './../../context/index';
+import PaginationControlled from "./../../components/Pagination";
+import PropTypes from 'prop-types';
 
 // Soft UI Dashboard React examples
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -47,7 +49,7 @@ function Article_factory_table() {
   const [sendData, SetSendData] = useState([]);
   const [statusBtn, SetStatusBtn] = useState({ available: false });
   const baseURL = `https://lovely-boot-production.up.railway.app`
-  const { columns, rows } = dataFun();
+  const { columns, rows, paginationData } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
 
@@ -208,6 +210,11 @@ function Article_factory_table() {
             <Table columns={prCols} rows={prRows} />
           </SoftBox>
         </Card> */}
+          <SoftBox display="flex" justifyContent="center" alignItems="center">
+            <Stack spacing={2}>
+              <PaginationControlled paginationData={paginationData} />
+            </Stack>
+          </SoftBox>
         </SoftBox>
         :
         <Stack spacing={2}>
@@ -221,5 +228,11 @@ function Article_factory_table() {
     </DashboardLayout>
   );
 }
+
+Article_factory_table.propTypes = {
+  paginationData: PropTypes.object.isRequired
+};
+
+
 
 export default Article_factory_table;

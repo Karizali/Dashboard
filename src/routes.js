@@ -68,7 +68,7 @@ const routes = [
     component: <Dashboard />,
     noCollapse: true,
   },
-  { type: "title", title: "Biatrip", key: "account-pages" },
+  { type: "title", title: "BA trips", key: "account-pages" },
   {
     type: "collapse",
     name: "Yellow Pages",

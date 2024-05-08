@@ -6,7 +6,9 @@ import SoftAvatar from "components/SoftAvatar";
 import SoftBadge from "components/SoftBadge";
 import axios from "axios";
 import { useEffect, useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import { useSoftUIController, setIsLoading } from './../../../context/index';
+import PropTypes from 'prop-types';
 
 // Images
 import team2 from "assets/images/team-2.jpg";
@@ -51,36 +53,47 @@ function Function({ job, org }) {
   );
 }
 function dataFun() {
+
+
   const [controller, dispatch] = useSoftUIController();
   const { isLoading } = controller;
 
-  const [apiData, SetApiData] = useState([{ Key1: "abc" }]);
+  const [apiData, SetApiData] = useState([]);
+  const [totalPages, SetTotalPages] = useState(10);
+  const [pageAndLimit, SetPageAndLimit] = useState({
+    page: 1,
+    limit: 10
+  });
 
   const baseURL = `https://lovely-boot-production.up.railway.app`
 
   useEffect(() => {
     (async () => {
+      // console.log(pageAndLimit.page,pageAndLimit.limit)
       setIsLoading(dispatch, true);
       try {
-        const response = await axios.get(`${baseURL}/scraper/procurement/data`, {
+        const response = await axios.get(`${baseURL}/scraper/procurement/paginate?page=${pageAndLimit.page}&limit=${pageAndLimit.limit}`, {
           headers: {
             'Content-Type': 'application/json'
           }
         })
-        SetApiData(response.data)
+        SetTotalPages(response.data.total_pages);
+        SetApiData(response.data.data);
         setIsLoading(dispatch, false);
-        console.log(response)
+        console.log(response.data.data)
+        
       } catch (error) {
         setIsLoading(dispatch, false);
         console.error(error);
       }
     })()
-  }, []);
+  }, [pageAndLimit]);
 
   useEffect(() => {
     console.log(apiData)
-
+    console.log(totalPages)
   }, [apiData])
+
 
   const row = apiData.map((eachData, index) => {
     return {
@@ -117,10 +130,20 @@ function dataFun() {
       { name: "status", align: "center" },
     ],
 
-    rows: row
+    rows: row,
+    paginationData:
+    {
+      SetPageAndLimit,
+      pageAndLimit,
+      totalPages
+    }
   };
   return authorsTableData
 }
 
+dataFun.propTypes = {
+  paginationData: PropTypes.object.isRequired
+};
 
 export default dataFun;
+

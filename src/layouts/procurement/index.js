@@ -26,6 +26,8 @@ import Pagination from '@mui/material/Pagination';
 import Stack from '@mui/material/Stack';
 import Skeleton from '@mui/material/Skeleton';
 import { useSoftUIController, setIsLoading } from './../../context/index';
+import PaginationControlled from "./../../components/Pagination";
+import PropTypes from 'prop-types';
 
 // Soft UI Dashboard React examples
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
@@ -47,7 +49,7 @@ function Procurement() {
   const [sendData, SetSendData] = useState([]);
   const [statusBtn, SetStatusBtn] = useState([]);
   const baseURL = `https://lovely-boot-production.up.railway.app`
-  const { columns, rows } = dataFun();
+  const { columns, rows,paginationData } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
   const startBtn = () => {
@@ -194,6 +196,7 @@ function Procurement() {
                 <Table columns={columns} rows={rows} />
               </SoftBox>
             </Card>
+
           </SoftBox>
           {/* <Card>
           <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
@@ -214,7 +217,7 @@ function Procurement() {
         </Card> */}
           <SoftBox display="flex" justifyContent="center" alignItems="center">
             <Stack spacing={2}>
-              <Pagination count={10} />
+              <PaginationControlled paginationData={paginationData} />
             </Stack>
           </SoftBox>
 
@@ -230,5 +233,9 @@ function Procurement() {
     </DashboardLayout>
   );
 }
+
+Procurement.propTypes = {
+  paginationData: PropTypes.object.isRequired
+};
 
 export default Procurement;
