@@ -76,6 +76,7 @@ function Article_factory_table() {
   const sendBtn = () => {
 
     (async () => {
+      setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/article_factory/send`, {
           headers: {
@@ -85,20 +86,21 @@ function Article_factory_table() {
         SetSendData(response)
         Swal.fire({
           icon: "success",
-          title: "Send successfully",
-          text: response.data,
+          title: "Start successfully",
+          text: response.data.status,
         });
+        setIsLoading(dispatch, false);
         console.log(response.data)
       } catch (error) {
         SetSendData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
-          text: response.data,
+          text: error.data,
         });
+        setIsLoading(dispatch, false);
         console.error(error.data);
       }
-
     })()
   }
 
@@ -168,12 +170,15 @@ function Article_factory_table() {
                           <SoftTypography variant="h6">Available</SoftTypography>
                       }
                     </div>
-                    <Button
-                      onClick={sendBtn}
-                      variant="outlined"
-                      style={{ color: "blue", cursor: "pointer" }}
-                    >Send
-                    </Button>
+                    <div>
+                      <Button
+                        onClick={sendBtn}
+                        variant="outlined"
+                        style={{ color: "blue", cursor: "pointer",marginBottom:30 }}
+                      >Send
+                      </Button>
+                      <SoftTypography variant="h6" ></SoftTypography>
+                    </div>
                     <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
                     <SoftTypography variant="h6"></SoftTypography>
                   </SoftBox>

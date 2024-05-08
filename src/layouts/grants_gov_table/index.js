@@ -24,7 +24,7 @@ import { useEffect, useState } from "react";
 import Swal from 'sweetalert2'
 import Skeleton from '@mui/material/Skeleton';
 import Stack from '@mui/material/Stack';
-import { useSoftUIController, setIsLoading } from './../../context/index';
+import { useSoftUIController, setIsLoading } from './../../context';
 import PaginationControlled from "./../../components/Pagination";
 import PropTypes from 'prop-types';
 
@@ -48,7 +48,7 @@ function Grants_gov_table() {
   const [statusBtn, SetStatusBtn] = useState([]);
   const [sendData, SetSendData] = useState([]);
   const baseURL = `https://lovely-boot-production.up.railway.app`
-  const { columns, rows,paginationData } = dataFun();
+  const { columns, rows, paginationData } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
   const startBtn = () => {
@@ -61,19 +61,19 @@ function Grants_gov_table() {
           }
         })
         SetStartData(response)
-        Swal.fire({
-          icon: "success",
-          title: "Send successfully",
-          text: response.data,
-        });
-        console.log(response.data)
+        // Swal.fire({
+        //   icon: "success",
+        //   title: "Start successfully",
+        //   text: response.data.status,
+        // });
+        console.log("Start "+response.data)
       } catch (error) {
         SetSendData(error.data)
-        Swal.fire({
-          icon: "error",
-          title: "Error occur",
-          text: response.data,
-        });
+        // Swal.fire({
+        //   icon: "error",
+        //   title: "Error occur",
+        //   text: response.data,
+        // });
         console.error(error.data);
       }
 
@@ -83,6 +83,8 @@ function Grants_gov_table() {
   const sendBtn = () => {
 
     (async () => {
+
+      setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/grants_gov/send`, {
           headers: {
@@ -90,9 +92,21 @@ function Grants_gov_table() {
           }
         })
         SetSendData(response)
+        Swal.fire({
+          icon: "success",
+          title: "Send successfully",
+          text: response.data,
+        });
+        setIsLoading(dispatch, false);
         console.log(response.data)
       } catch (error) {
         SetSendData(error.data)
+        Swal.fire({
+          icon: "error",
+          title: "Error occur",
+          text: error.data,
+        });
+        setIsLoading(dispatch, false);
         console.error(error.data);
       }
 
@@ -154,37 +168,29 @@ function Grants_gov_table() {
                   <SoftTypography variant="h4">Grants_gov table</SoftTypography>
                 </SoftBox>
                 <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                  {
-                    (statusBtn.available == false)
-                      ?
-                      <div>
-                        <Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start
-                        </Button>
-                        {
-                          !(statusBtn.available) ?
-                            <SoftTypography variant="h6">Not Available</SoftTypography>
-                            :
-                            <SoftTypography variant="h6">Available</SoftTypography>
-                        }
-                      </div>
-                      :
+                    <div>
+                      <Button onClick={startBtn} variant="outlined"
+                        style={{ color: "blue", cursor: "pointer" }}>Start </Button>
+                      {
+                        !(statusBtn.available)
+                          ?
+                          <SoftTypography variant="h6">Not Available</SoftTypography>
+                          :
+                          <SoftTypography variant="h6">Available</SoftTypography>
+                      }
+                    </div>
+                    <div>
                       <Button
-                        onClick={startBtn} variant="outlined"
-                        style={{ color: "blue", cursor: "pointer" }}
-                      >Start
+                        onClick={sendBtn}
+                        variant="outlined"
+                        style={{ color: "blue", cursor: "pointer",marginBottom:30 }}
+                      >Send
                       </Button>
-                  }
-
-                  <Button
-                    onClick={sendBtn}
-                    variant="outlined"
-                    style={{ color: "blue", cursor: "pointer" }}
-                  >Send
-                  </Button>
-
-                  <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
-                  <SoftTypography variant="h6"></SoftTypography>
-                </SoftBox>
+                      <SoftTypography variant="h6" ></SoftTypography>
+                    </div>
+                    <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
+                    <SoftTypography variant="h6"></SoftTypography>
+                  </SoftBox>
                 <SoftBox
                   sx={{
                     "& .MuiTableRow-root:not(:last-child)": {

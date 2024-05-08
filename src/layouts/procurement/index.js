@@ -49,7 +49,7 @@ function Procurement() {
   const [sendData, SetSendData] = useState([]);
   const [statusBtn, SetStatusBtn] = useState([]);
   const baseURL = `https://lovely-boot-production.up.railway.app`
-  const { columns, rows,paginationData } = dataFun();
+  const { columns, rows, paginationData } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
   const startBtn = () => {
@@ -75,6 +75,7 @@ function Procurement() {
   const sendBtn = () => {
 
     (async () => {
+      setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/procurement/send`, {
           headers: {
@@ -87,14 +88,16 @@ function Procurement() {
           title: "Send successfully",
           text: response.data,
         });
+        setIsLoading(dispatch, false);
         console.log(response.data)
       } catch (error) {
         SetSendData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
-          text: response.data,
+          text: error.data,
         });
+        setIsLoading(dispatch, false);
         console.error(error.data);
       }
 
@@ -155,31 +158,26 @@ function Procurement() {
                 <SoftTypography variant="h4">Procurement table</SoftTypography>
               </SoftBox>
               <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                {(statusBtn.available == false) ?
-                  <div>
-                    <Button
-                      onClick={startBtn}
-                      variant="outlined"
-                      style={{ color: "blue", cursor: "pointer" }}
-                    >Start
-                    </Button>
-                    {!(statusBtn.available) ?
-                      <SoftTypography variant="h6">
-                        Not Available</SoftTypography>
-                      : <SoftTypography variant="h6">
-                        Available
-                      </SoftTypography>
-                    }
-                  </div> :
-                  <Button onClick={startBtn} variant="outlined" style={{ color: "blue", cursor: "pointer" }}>Start</Button>
-                }
-                <Button
-                  onClick={sendBtn}
-                  variant="outlined"
-                  style={{ color: "blue", cursor: "pointer" }}
-                >Send
-                </Button>
-
+                <div>
+                  <Button onClick={startBtn} variant="outlined"
+                    style={{ color: "blue", cursor: "pointer" }}>Start </Button>
+                  {
+                    !(statusBtn.available)
+                      ?
+                      <SoftTypography variant="h6">Not Available</SoftTypography>
+                      :
+                      <SoftTypography variant="h6">Available</SoftTypography>
+                  }
+                </div>
+                <div>
+                  <Button
+                    onClick={sendBtn}
+                    variant="outlined"
+                    style={{ color: "blue", cursor: "pointer", marginBottom: 30 }}
+                  >Send
+                  </Button>
+                  <SoftTypography variant="h6" ></SoftTypography>
+                </div>
                 <SoftTypography variant="h6">Status{`: ${statusBtn.status}`}</SoftTypography>
                 <SoftTypography variant="h6"></SoftTypography>
               </SoftBox>

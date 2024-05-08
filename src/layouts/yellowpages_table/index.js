@@ -78,6 +78,7 @@ function Yellowpages_table() {
   const sendBtn = () => {
 
     (async () => {
+      setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/yellowpages/send`, {
           headers: {
@@ -90,14 +91,16 @@ function Yellowpages_table() {
           title: "Send successfully",
           text: response.data,
         });
+        setIsLoading(dispatch, false);
         console.log(response.data)
       } catch (error) {
         SetSendData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
-          text: response.data,
+          text: error.data,
         });
+        setIsLoading(dispatch, false);
         console.error(error.data);
       }
 
@@ -167,7 +170,7 @@ function Yellowpages_table() {
                 <Button
                   onClick={sendBtn}
                   variant="outlined"
-                  style={{ color: "blue", cursor: "pointer" }}
+                  style={{ color: "blue", cursor: "pointer",marginBottom:30  }}
                 >Send
                 </Button>
                 <SoftTypography variant="h6">Status{`: ${statusBtn?.status}`}</SoftTypography>
