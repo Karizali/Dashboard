@@ -38,6 +38,7 @@ import Table from "examples/Tables/Table";
 import dataFun from "layouts/grants_gov_table/data/authorsTableData";
 import projectsTableData from "layouts/grants_gov_table/data/projectsTableData";
 import axios from "axios";
+import Loader from './../../examples/loader/loader'
 
 function Grants_gov_table() {
 
@@ -45,37 +46,23 @@ function Grants_gov_table() {
   const { isLoading } = controller;
   const baseURL = `https://lovely-boot-production.up.railway.app`
 
-  const [startData, SetStartData] = useState([]);
-  const [statusBtn, SetStatusBtn] = useState([]);
-  const [sendData, SetSendData] = useState([]);
-  const [deleteData, SetDeleteData] = useState([]);
+
+  const [startData, setStartData] = useState([]);
+  const [sendData, setSendData] = useState([]);
+  const [statusBtn, setStatusBtn] = useState({ available: false });
+  const [deleteData, setDeleteData] = useState([]);
+  const [checkStatus, setCheckStatus] = useState(false);
+
 
   const { columns, rows, paginationData, SetIsDeleteOrStart, isDeleteOrStart } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
-  const startBtn = () => {
-    (async () => {
-      if (statusBtn.available) {
-        try {
-          const response = await axios.get(`${baseURL}/scraper/grants_gov/start`, {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          })
-          SetStartData(response)
-          SetIsDeleteOrStart(!isDeleteOrStart);
-        } catch (error) {
-          SetSendData(error.data)
-          console.error(error.data);
-        }
-      }
-    })()
-  }
+
+
 
   const sendBtn = () => {
 
     (async () => {
-
       setIsLoading(dispatch, true);
       try {
         const response = await axios.get(`${baseURL}/scraper/grants_gov/send`, {
@@ -83,7 +70,7 @@ function Grants_gov_table() {
             'Content-Type': 'application/json'
           }
         })
-        SetSendData(response)
+        setSendData(response.data)
         Swal.fire({
           icon: "success",
           title: "Send successfully",
@@ -92,7 +79,7 @@ function Grants_gov_table() {
         setIsLoading(dispatch, false);
         console.log(response.data)
       } catch (error) {
-        SetSendData(error.data)
+        setSendData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
@@ -115,7 +102,7 @@ function Grants_gov_table() {
             'Content-Type': 'application/json'
           }
         })
-        SetDeleteData(response)
+        setDeleteData(response)
         Swal.fire({
           icon: "success",
           title: "Delete Response",
@@ -123,15 +110,16 @@ function Grants_gov_table() {
         });
         setIsLoading(dispatch, false);
         SetIsDeleteOrStart(!isDeleteOrStart);
+        console.log(response.data)
       } catch (error) {
-        SetDeleteData(error.data)
+        setDeleteData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
           text: error.data,
         });
-        setIsLoading(dispatch, false);
         SetIsDeleteOrStart(!isDeleteOrStart);
+        setIsLoading(dispatch, false);
         console.error(error.data);
       }
 
@@ -141,118 +129,228 @@ function Grants_gov_table() {
 
 
   const gettingStatus = async () => {
-    let mounted = true;
     try {
       const response = await axios.get(`${baseURL}/scraper/grants_gov/status`, {
         headers: {
           'Content-Type': 'application/json'
         }
-      })
-      if (mounted) {
-        SetStatusBtn(response?.data);
-        // if (statusBtn != response?.data) {
-        //   SetIsDeleteOrStart(!isDeleteOrStart)
-        // }
-        console.log(response?.data)
-      }
-      // SetStatusBtn(response)
-    } catch (error) {
-      if (mounted) {
-        SetStatusBtn(error?.data);
-        console.log(error)
-      }
-    }
-    return () => {
-      mounted = false;
-    };
+      });
+      setStatusBtn(response.data);
+      console.log(response.data);
 
-  }
+      if (!response.data.available) {
+        setCheckStatus(true); // Stop checking if the status is already true and checkStatus is true
+      }
+      if (response.data.available) {
+        setCheckStatus(false); // Stop checking if the status is already true and checkStatus is true
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   useEffect(() => {
-    const getStatus = async () => {
+    if (!checkStatus) {
+      gettingStatus(); // Start checking status initially
+    }
+  }, []);
+
+  useEffect(() => {
+    let intervalId;
+
+    const getStatusEvery2sec = async () => {
       await gettingStatus();
-      setTimeout(getStatus, 1000);
+      intervalId = setTimeout(getStatusEvery2sec, 2000);
     };
 
-    getStatus();
+    if (checkStatus) {
+      getStatusEvery2sec();
+    } else {
+      clearTimeout(intervalId); // Clear the timeout if status becomes true or if it's already true
+    }
+
     return () => {
-      clearTimeout(getStatus);
+      clearTimeout(intervalId);
     };
-  }, []);
+  }, [checkStatus]);
+
+
+
+
+  const startBtn = async () => {
+    console.log("Start button clicked");
+    if (statusBtn.available) {
+      try {
+        console.log("Sending start request");
+        const response = await axios.get(`${baseURL}/scraper/grants_gov/start`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        setStartData(response.data);
+        if (!response.data.available) {
+          setCheckStatus(true);
+        }
+        console.log(response.data.available);
+        // Update checkStatus based on the response
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
 
 
   return (
-
     <DashboardLayout>
       <DashboardNavbar />
-      {
-        (!isLoading) ?
-          <SoftBox py={3}>
-            <SoftBox mb={3}>
-              <Card>
-                <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                  <SoftTypography variant="h4">Grants_gov table</SoftTypography>
-                </SoftBox>
-                <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
-
-                  <Button
-                    onClick={startBtn}
-                    variant="outlined" size="medium"
-                    style={{ color: "blue", cursor: "pointer" }}>Start
-                  </Button>
-
-                  <Button
-                    onClick={sendBtn}
-                    variant="outlined"
-                    size="medium"
-                    style={{ color: "blue", cursor: "pointer" }}
-                  >Send
-                  </Button>
-                  <Button
-                    onClick={deleteBtn}
-                    variant="outlined"
-                    size="medium"
-                    style={{ color: "blue", cursor: "pointer" }}
-                  >Delete
-                  </Button>
-                  <SoftTypography variant="h5">Status{`: ${statusBtn?.status}`}</SoftTypography>
-
-                </SoftBox>
-                <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+      {(!isLoading) ?
+        <SoftBox py={3}>
+          <SoftBox mb={3}>
+            {
+              (rows) ?
+                <Card>
+                  <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                    <SoftTypography variant="h6">Grants gorverment table</SoftTypography>
+                  </SoftBox>
                   {
-                    !(statusBtn?.available) ?
-                      <SoftTypography variant="h7" color="error">Not Available</SoftTypography> :
-                      <SoftTypography variant="h7" color="success">Available</SoftTypography>
+                    (statusBtn.available)
+                      ?
+                      <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+
+                        <Button
+
+                          onClick={startBtn}
+                          variant="outlined" size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
+
+                        <Button
+
+                          onClick={sendBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}
+                        >Send
+                        </Button>
+                        <Button
+
+                          onClick={deleteBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "red", cursor: "pointer" }}
+                        >Delete
+                        </Button>
+                        <SoftTypography variant="h5">Status{`: `}
+                          <div
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 50,
+                              margin: 10,
+                              backgroundColor: "green"
+                            }}
+                          ></div>
+                        </SoftTypography>
+
+                      </SoftBox>
+                      :
+                      <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+
+                        <Button
+                          disabled
+                          onClick={startBtn}
+                          variant="outlined" size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
+
+                        <Button
+                          disabled
+                          onClick={sendBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}
+                        >Send
+                        </Button>
+                        <Button
+                          disabled
+                          onClick={deleteBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "red", cursor: "pointer" }}
+                        >Delete
+                        </Button>
+                        <SoftTypography variant="h5">Status{`: `}
+
+                          <div
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 50,
+                              margin: 10,
+                              backgroundColor: "red"
+                            }}
+                          ></div>
+                        </SoftTypography>
+
+                      </SoftBox>
+
                   }
+                  <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+                    {
+                      !(statusBtn?.available) ?
+                        <SoftTypography variant="h7" color="error">Not Available</SoftTypography> :
+                        <SoftTypography variant="h7" color="success">Available</SoftTypography>
+                    }
 
-                </SoftBox>
-                <SoftBox
-                  sx={{
-                    "& .MuiTableRow-root:not(:last-child)": {
-                      "& td": {
-                        borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                          `${borderWidth[1]} solid ${borderColor}`,
+                  </SoftBox>
+                  <SoftBox
+                    sx={{
+                      "& .MuiTableRow-root:not(:last-child)": {
+                        "& td": {
+                          borderBottom: ({ borders: { borderWidth, borderColor } }) =>
+                            `${borderWidth[1]} solid ${borderColor}`,
+                        },
                       },
-                    },
-                  }}
-                >
-                  <Table columns={columns} rows={rows} />
-                </SoftBox>
-              </Card>
-            </SoftBox>
-            <SoftBox display="flex" justifyContent="center" alignItems="center">
-              <Stack spacing={2}>
-                <PaginationControlled paginationData={paginationData} />
-              </Stack>
-            </SoftBox>
-          </SoftBox> :
-
-          <Stack spacing={2}>
-            <Skeleton variant="rectangular" height={100} />
-            <Skeleton variant="rectangular" height={100} />
-            <Skeleton variant="rectangular" height={100} />
-            <Skeleton variant="rounded" height={200} />
-          </Stack>
+                    }}
+                  >
+                    <Table columns={columns} rows={rows} />
+                  </SoftBox>
+                </Card> :
+                <Loader />
+            }
+          </SoftBox>
+          {/* <Card>
+          <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+            <SoftTypography variant="h6">Projects table</SoftTypography>
+          </SoftBox>
+          <SoftBox
+            sx={{
+              "& .MuiTableRow-root:not(:last-child)": {
+                "& td": {
+                  borderBottom: ({ borders: { borderWidth, borderColor } }) =>
+                    `${borderWidth[1]} solid ${borderColor}`,
+                },
+              },
+            }}
+          >
+            <Table columns={prCols} rows={prRows} />
+          </SoftBox>
+        </Card> */}
+          <SoftBox display="flex" justifyContent="center" alignItems="center">
+            <Stack spacing={2}>
+              <PaginationControlled paginationData={paginationData} />
+            </Stack>
+          </SoftBox>
+        </SoftBox>
+        :
+        <Stack spacing={2}>
+          <Skeleton variant="rectangular" height={100} />
+          <Skeleton variant="rectangular" height={100} />
+          <Skeleton variant="rectangular" height={100} />
+          <Skeleton variant="rounded" height={200} />
+        </Stack>
       }
       <Footer />
     </DashboardLayout>

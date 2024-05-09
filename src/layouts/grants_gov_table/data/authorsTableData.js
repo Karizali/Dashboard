@@ -106,7 +106,7 @@ function dataFun() {
         <Function job={`${eachData["Opportunity Status"]}`} />
       ),
       url: (
-        <Function job={`${eachData.url}`} />
+        <Link target="_blank"> <Function job={`${eachData.url}`} /></Link>
       ),
       "Posted Date": (
         <SoftTypography variant="caption" color="secondary" fontWeight="medium">

@@ -1,7 +1,24 @@
 .textContainer {
     display: block;
-    width: 200px;
+    width: 300px;
     white-space: nowrap;
-    overflow: hidden;
+    overflow: scroll;
     text-overflow: ellipsis;
   }
+  ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; 
+}
+::-webkit-scrollbar {
+  width: 2px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e4e2e2;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #a5a4a4;
+}

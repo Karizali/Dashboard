@@ -46,36 +46,18 @@ function Article_factory_table() {
   const { isLoading } = controller;
   const baseURL = `https://lovely-boot-production.up.railway.app`
 
-  const [startData, SetStartData] = useState([]);
-  const [sendData, SetSendData] = useState([]);
-  const [statusBtn, SetStatusBtn] = useState({ available: false });
-  const [deleteData, SetDeleteData] = useState([]);
 
-  const { columns, rows, paginationData,SetIsDeleteOrStart,isDeleteOrStart } = dataFun();
+  const [startData, setStartData] = useState([]);
+  const [sendData, setSendData] = useState([]);
+  const [statusBtn, setStatusBtn] = useState({ available: false });
+  const [deleteData, setDeleteData] = useState([]);
+  const [checkStatus, setCheckStatus] = useState(false);
+
+
+  const { columns, rows, paginationData, SetIsDeleteOrStart, isDeleteOrStart } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
 
-  const startBtn = () => {
-
-    (async () => {
-
-      if(statusBtn.available){
-        try {
-        const response = await axios.get(`${baseURL}/scraper/article_factory/start`, {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        SetStartData(response)
-        SetIsDeleteOrStart(!isDeleteOrStart);
-      } catch (error) {
-        SetStartData(error)
-        console.error(error.data);
-      }
-    }
-
-    })()
-  }
 
 
   const sendBtn = () => {
@@ -88,16 +70,16 @@ function Article_factory_table() {
             'Content-Type': 'application/json'
           }
         })
-        SetSendData(response)
+        setSendData(response.data)
         Swal.fire({
           icon: "success",
-          title: "Start successfully",
-          text: response.data.status,
+          title: "Send successfully",
+          text: response.data,
         });
         setIsLoading(dispatch, false);
         console.log(response.data)
       } catch (error) {
-        SetSendData(error.data)
+        setSendData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
@@ -106,6 +88,7 @@ function Article_factory_table() {
         setIsLoading(dispatch, false);
         console.error(error.data);
       }
+
     })()
   }
 
@@ -119,7 +102,7 @@ function Article_factory_table() {
             'Content-Type': 'application/json'
           }
         })
-        SetDeleteData(response)
+        setDeleteData(response)
         Swal.fire({
           icon: "success",
           title: "Delete Response",
@@ -129,7 +112,7 @@ function Article_factory_table() {
         SetIsDeleteOrStart(!isDeleteOrStart);
         console.log(response.data)
       } catch (error) {
-        SetDeleteData(error.data)
+        setDeleteData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
@@ -146,42 +129,78 @@ function Article_factory_table() {
 
 
   const gettingStatus = async () => {
-    let mounted = true;
     try {
       const response = await axios.get(`${baseURL}/scraper/article_factory/status`, {
         headers: {
           'Content-Type': 'application/json'
         }
-      })
-      if (mounted) {
-        SetStatusBtn(response?.data);
-        console.log(response?.data)
-      }
-      // SetStatusBtn(response)
-    } catch (error) {
-      if (mounted) {
-        SetStatusBtn(error?.data);
-        console.log(error)
-      }
-    }
-    return () => {
-      mounted = false;
-    };
+      });
+      setStatusBtn(response.data);
+      console.log(response.data);
 
-  }
+      if (!response.data.available) {
+        setCheckStatus(true); // Stop checking if the status is already true and checkStatus is true
+      }
+      if (response.data.available) {
+        setCheckStatus(false); // Stop checking if the status is already true and checkStatus is true
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
 
   useEffect(() => {
-    const getStatus = async () => {
+    if (!checkStatus) {
+      gettingStatus(); // Start checking status initially
+    }
+  }, []);
+
+  useEffect(() => {
+    let intervalId;
+
+    const getStatusEvery2sec = async () => {
       await gettingStatus();
-      setTimeout(getStatus, 1000);
+      intervalId = setTimeout(getStatusEvery2sec, 2000);
     };
 
-    getStatus();
+    if (checkStatus) {
+      getStatusEvery2sec();
+    } else {
+      clearTimeout(intervalId); // Clear the timeout if status becomes true or if it's already true
+    }
 
     return () => {
-      clearTimeout(getStatus);
+      clearTimeout(intervalId);
     };
-  }, []);
+  }, [checkStatus]);
+
+
+
+
+  const startBtn = async () => {
+    console.log("Start button clicked");
+    if (statusBtn.available) {
+      try {
+        console.log("Sending start request");
+        const response = await axios.get(`${baseURL}/scraper/article_factory/start`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        setStartData(response.data);
+        if (!response.data.available) {
+          setCheckStatus(true);
+        }
+        console.log(response.data.available);
+        // Update checkStatus based on the response
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+
 
   return (
     <DashboardLayout>
@@ -195,31 +214,89 @@ function Article_factory_table() {
                   <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
                     <SoftTypography variant="h6">Article factory table</SoftTypography>
                   </SoftBox>
-                  <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+                  {
+                    (statusBtn.available)
+                      ?
+                      <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
 
-                    <Button
-                      onClick={startBtn}
-                      variant="outlined" size="medium"
-                      style={{ color: "blue", cursor: "pointer" }}>Start
-                    </Button>
+                        <Button
 
-                    <Button
-                      onClick={sendBtn}
-                      variant="outlined"
-                      size="medium"
-                      style={{ color: "blue", cursor: "pointer" }}
-                    >Send
-                    </Button>
-                    <Button
-                      onClick={deleteBtn}
-                      variant="outlined"
-                      size="medium"
-                      style={{ color: "blue", cursor: "pointer" }}
-                    >Delete
-                    </Button>
-                    <SoftTypography variant="h5">Status{`: ${statusBtn?.status}`}</SoftTypography>
+                          onClick={startBtn}
+                          variant="outlined" size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
 
-                  </SoftBox>
+                        <Button
+
+                          onClick={sendBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}
+                        >Send
+                        </Button>
+                        <Button
+
+                          onClick={deleteBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "red", cursor: "pointer" }}
+                        >Delete
+                        </Button>
+                        <SoftTypography variant="h5">Status{`: `}
+                          <div
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 50,
+                              margin: 10,
+                              backgroundColor: "green"
+                            }}
+                          ></div>
+                        </SoftTypography>
+
+                      </SoftBox>
+                      :
+                      <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+
+                        <Button
+                          disabled
+                          onClick={startBtn}
+                          variant="outlined" size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
+
+                        <Button
+                          disabled
+                          onClick={sendBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}
+                        >Send
+                        </Button>
+                        <Button
+                          disabled
+                          onClick={deleteBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "red", cursor: "pointer" }}
+                        >Delete
+                        </Button>
+                        <SoftTypography variant="h5">Status{`: `}
+
+                          <div
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 50,
+                              margin: 10,
+                              backgroundColor: "red"
+                            }}
+                          ></div>
+                        </SoftTypography>
+
+                      </SoftBox>
+
+                  }
                   <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
                     {
                       !(statusBtn?.available) ?
@@ -276,7 +353,7 @@ function Article_factory_table() {
         </Stack>
       }
       <Footer />
-    </DashboardLayout>
+    </DashboardLayout >
   );
 }
 

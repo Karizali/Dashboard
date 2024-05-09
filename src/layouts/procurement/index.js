@@ -39,40 +39,26 @@ import Table from "examples/Tables/Table";
 import dataFun from "layouts/procurement/data/authorsTableData";
 import projectsTableData from "layouts/procurement/data/projectsTableData";
 import axios from "axios";
+import Loader from './../../examples/loader/loader'
 
 function Procurement() {
 
   const [controller, dispatch] = useSoftUIController();
   const { isLoading } = controller;
-
   const baseURL = `https://lovely-boot-production.up.railway.app`
-  const [startData, SetStartData] = useState([]);
-  const [sendData, SetSendData] = useState([]);
-  const [statusBtn, SetStatusBtn] = useState([]);
-  const [deleteData, SetDeleteData] = useState([]);
+
+
+  const [startData, setStartData] = useState([]);
+  const [sendData, setSendData] = useState([]);
+  const [statusBtn, setStatusBtn] = useState({ available: false });
+  const [deleteData, setDeleteData] = useState([]);
+  const [checkStatus, setCheckStatus] = useState(false);
+
 
   const { columns, rows, paginationData, SetIsDeleteOrStart, isDeleteOrStart } = dataFun();
   const { columns: prCols, rows: prRows } = projectsTableData;
 
-  const startBtn = () => {
 
-    (async () => {
-      if (statusBtn.available) {
-        try {
-          const response = await axios.get(`${baseURL}/scraper/procurement/start`, {
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          })
-          SetStartData(response)
-          SetIsDeleteOrStart(!isDeleteOrStart);
-        } catch (error) {
-          SetStartData(error)
-          console.error(error.data);
-        }
-      }
-    })()
-  }
 
 
   const sendBtn = () => {
@@ -85,7 +71,7 @@ function Procurement() {
             'Content-Type': 'application/json'
           }
         })
-        SetSendData(response)
+        setSendData(response.data)
         Swal.fire({
           icon: "success",
           title: "Send successfully",
@@ -94,7 +80,7 @@ function Procurement() {
         setIsLoading(dispatch, false);
         console.log(response.data)
       } catch (error) {
-        SetSendData(error.data)
+        setSendData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
@@ -106,6 +92,7 @@ function Procurement() {
 
     })()
   }
+
   const deleteBtn = () => {
 
     (async () => {
@@ -116,7 +103,7 @@ function Procurement() {
             'Content-Type': 'application/json'
           }
         })
-        SetDeleteData(response)
+        setDeleteData(response)
         Swal.fire({
           icon: "success",
           title: "Delete Response",
@@ -124,15 +111,16 @@ function Procurement() {
         });
         setIsLoading(dispatch, false);
         SetIsDeleteOrStart(!isDeleteOrStart);
+        console.log(response.data)
       } catch (error) {
-        SetDeleteData(error.data)
+        setDeleteData(error.data)
         Swal.fire({
           icon: "error",
           title: "Error occur",
           text: error.data,
         });
-        setIsLoading(dispatch, false);
         SetIsDeleteOrStart(!isDeleteOrStart);
+        setIsLoading(dispatch, false);
         console.error(error.data);
       }
 
@@ -142,106 +130,197 @@ function Procurement() {
 
 
   const gettingStatus = async () => {
-    let mounted = true;
     try {
       const response = await axios.get(`${baseURL}/scraper/procurement/status`, {
         headers: {
           'Content-Type': 'application/json'
         }
-      })
-      if (mounted) {
+      });
+      setStatusBtn(response.data);
+      console.log(response.data);
 
-        SetStatusBtn(response?.data);
-        // if (statusBtn != response?.data) {
-        //   SetIsDeleteOrStart(!isDeleteOrStart)
-        // }
-        console.log(response?.data)
+      if (!response.data.available) {
+        setCheckStatus(true); // Stop checking if the status is already true and checkStatus is true
       }
-      // SetStatusBtn(response)
+      if (response.data.available) {
+        setCheckStatus(false); // Stop checking if the status is already true and checkStatus is true
+      }
     } catch (error) {
-      if (mounted) {
-        SetStatusBtn(error?.data);
-        console.log(error)
-      }
+      console.error(error);
     }
-    return () => {
-      mounted = false;
-    };
+  };
 
-  }
 
   useEffect(() => {
-
-    const getStatus = async () => {
-      await gettingStatus();
-      setTimeout(getStatus, 1000);
-    };
-
-    getStatus();
-    return () => {
-      clearTimeout(getStatus);
-    };
+    if (!checkStatus) {
+      gettingStatus(); // Start checking status initially
+    }
   }, []);
+
+  useEffect(() => {
+    let intervalId;
+
+    const getStatusEvery2sec = async () => {
+      await gettingStatus();
+      intervalId = setTimeout(getStatusEvery2sec, 2000);
+    };
+
+    if (checkStatus) {
+      getStatusEvery2sec();
+    } else {
+      clearTimeout(intervalId); // Clear the timeout if status becomes true or if it's already true
+    }
+
+    return () => {
+      clearTimeout(intervalId);
+    };
+  }, [checkStatus]);
+
+
+
+
+  const startBtn = async () => {
+    console.log("Start button clicked");
+    if (statusBtn.available) {
+      try {
+        console.log("Sending start request");
+        const response = await axios.get(`${baseURL}/scraper/procurement/start`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        setStartData(response.data);
+        if (!response.data.available) {
+          setCheckStatus(true);
+        }
+        console.log(response.data.available);
+        // Update checkStatus based on the response
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
 
 
   return (
-
     <DashboardLayout>
       <DashboardNavbar />
       {(!isLoading) ?
         <SoftBox py={3}>
           <SoftBox mb={3}>
-            <Card>
-              <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
-                <SoftTypography variant="h4">Procurement table</SoftTypography>
-              </SoftBox>
-              <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+            {
+              (rows) ?
+                <Card>
+                  <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
+                    <SoftTypography variant="h6">Procurement table</SoftTypography>
+                  </SoftBox>
+                  {
+                    (statusBtn.available)
+                      ?
+                      <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
 
-                <Button
-                  onClick={startBtn}
-                  variant="outlined" size="medium"
-                  style={{ color: "blue", cursor: "pointer" }}>Start
-                </Button>
+                        <Button
 
-                <Button
-                  onClick={sendBtn}
-                  variant="outlined"
-                  size="medium"
-                  style={{ color: "blue", cursor: "pointer" }}
-                >Send
-                </Button>
-                <Button
-                  onClick={deleteBtn}
-                  variant="outlined"
-                  size="medium"
-                  style={{ color: "blue", cursor: "pointer" }}
-                >Delete
-                </Button>
-                <SoftTypography variant="h5">Status{`: ${statusBtn?.status}`}</SoftTypography>
+                          onClick={startBtn}
+                          variant="outlined" size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
 
-              </SoftBox>
-              <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
-                {
-                  !(statusBtn?.available) ?
-                    <SoftTypography variant="h7" color="error">Not Available</SoftTypography> :
-                    <SoftTypography variant="h7" color="success">Available</SoftTypography>
-                }
+                        <Button
 
-              </SoftBox>
-              <SoftBox
-                sx={{
-                  "& .MuiTableRow-root:not(:last-child)": {
-                    "& td": {
-                      borderBottom: ({ borders: { borderWidth, borderColor } }) =>
-                        `${borderWidth[1]} solid ${borderColor}`,
-                    },
-                  },
-                }}
-              >
-                <Table columns={columns} rows={rows} />
-              </SoftBox>
-            </Card>
+                          onClick={sendBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}
+                        >Send
+                        </Button>
+                        <Button
 
+                          onClick={deleteBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "red", cursor: "pointer" }}
+                        >Delete
+                        </Button>
+                        <SoftTypography variant="h5">Status{`: `}
+                          <div
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 50,
+                              margin: 10,
+                              backgroundColor: "green"
+                            }}
+                          ></div>
+                        </SoftTypography>
+
+                      </SoftBox>
+                      :
+                      <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+
+                        <Button
+                          disabled
+                          onClick={startBtn}
+                          variant="outlined" size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
+
+                        <Button
+                          disabled
+                          onClick={sendBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}
+                        >Send
+                        </Button>
+                        <Button
+                          disabled
+                          onClick={deleteBtn}
+                          variant="outlined"
+                          size="medium"
+                          style={{ color: "red", cursor: "pointer" }}
+                        >Delete
+                        </Button>
+                        <SoftTypography variant="h5">Status{`: `}
+
+                          <div
+                            style={{
+                              width: 50,
+                              height: 50,
+                              borderRadius: 50,
+                              margin: 10,
+                              backgroundColor: "red"
+                            }}
+                          ></div>
+                        </SoftTypography>
+
+                      </SoftBox>
+
+                  }
+                  <SoftBox display="flex" justifyContent="space-between" alignItems="center" py={1} px={3}>
+                    {
+                      !(statusBtn?.available) ?
+                        <SoftTypography variant="h7" color="error">Not Available</SoftTypography> :
+                        <SoftTypography variant="h7" color="success">Available</SoftTypography>
+                    }
+
+                  </SoftBox>
+                  <SoftBox
+                    sx={{
+                      "& .MuiTableRow-root:not(:last-child)": {
+                        "& td": {
+                          borderBottom: ({ borders: { borderWidth, borderColor } }) =>
+                            `${borderWidth[1]} solid ${borderColor}`,
+                        },
+                      },
+                    }}
+                  >
+                    <Table columns={columns} rows={rows} />
+                  </SoftBox>
+                </Card> :
+                <Loader />
+            }
           </SoftBox>
           {/* <Card>
           <SoftBox display="flex" justifyContent="space-between" alignItems="center" p={3}>
@@ -265,8 +344,8 @@ function Procurement() {
               <PaginationControlled paginationData={paginationData} />
             </Stack>
           </SoftBox>
-
-        </SoftBox> :
+        </SoftBox>
+        :
         <Stack spacing={2}>
           <Skeleton variant="rectangular" height={100} />
           <Skeleton variant="rectangular" height={100} />
