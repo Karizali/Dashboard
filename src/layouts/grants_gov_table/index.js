@@ -1,18 +1,3 @@
-/**
-=========================================================
-* Soft UI Dashboard React - v4.0.1
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/soft-ui-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 // @mui material components
 import Card from "@mui/material/Card";
 
@@ -44,7 +29,7 @@ function Grants_gov_table() {
 
   const [controller, dispatch] = useSoftUIController();
   const { isLoading } = controller;
-  const baseURL = `https://lovely-boot-production.up.railway.app`
+  const baseURL = `https://dynamic-unity-production.up.railway.app`
 
 
   const [startData, setStartData] = useState([]);
@@ -200,6 +185,28 @@ function Grants_gov_table() {
     }
   };
 
+  const stopBtn = async () => {
+    console.log("Stop button clicked");
+    if (statusBtn.available) {
+      try {
+        console.log("Sending stop request");
+        const response = await axios.get(`${baseURL}/scraper/grants_gov/stop`, {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        setStartData(response.data);
+        if (!response.data.available) {
+          setCheckStatus(true);
+        }
+        console.log(response.data.available);
+        // Update checkStatus based on the response
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
 
 
   return (
@@ -224,6 +231,13 @@ function Grants_gov_table() {
                           onClick={startBtn}
                           variant="outlined" size="medium"
                           style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
+
+                        <Button
+
+                          onClick={stopBtn}
+                          variant="outlined" size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}>Stop
                         </Button>
 
                         <Button
@@ -263,6 +277,13 @@ function Grants_gov_table() {
                           onClick={startBtn}
                           variant="outlined" size="medium"
                           style={{ color: "blue", cursor: "pointer" }}>Start
+                        </Button>
+
+                        <Button
+                          disabled
+                          onClick={stopBtn}
+                          variant="outlined" size="medium"
+                          style={{ color: "blue", cursor: "pointer" }}>Stop
                         </Button>
 
                         <Button

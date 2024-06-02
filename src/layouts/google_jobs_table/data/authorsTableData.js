@@ -73,7 +73,7 @@ function dataFun() {
       // console.log(pageAndLimit.page,pageAndLimit.limit)
       setIsLoading(dispatch, true);
       try {
-        const response = await axios.get(`${baseURL}/scraper/grants_gov/paginate?page=${pageAndLimit.page}&limit=${pageAndLimit.limit}`, {
+        const response = await axios.get(`${baseURL}/scraper/google_jobs/paginate?page=${pageAndLimit.page}&limit=${pageAndLimit.limit}`, {
           headers: {
             'Content-Type': 'application/json'
           }

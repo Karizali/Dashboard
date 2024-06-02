@@ -39,6 +39,7 @@ Coded by www.creative-tim.com
 import Dashboard from "layouts/dashboard";
 import Article_factory_table from "layouts/article_factory_table";
 import Grants_gov_table from "layouts/grants_gov_table";
+import Google_jobs_table from "layouts/google_jobs_table";
 import Yellowpages_table from "layouts/yellowpages_table";
 import Procurement from "layouts/procurement";
 // import Billing from "layouts/billing";
@@ -96,7 +97,7 @@ const routes = [
     component: <Procurement />,
     noCollapse: true,
   },
-  { type: "title", title: "Jobs", key: "Jobs-tables" },
+  { type: "title", title: "Local Works", key: "Jobs-tables" },
   {
     type: "collapse",
     name: "Grants_gov",
@@ -104,6 +105,15 @@ const routes = [
     route: "/grants_gov_table",
     icon: <Office size="12px" />,
     component: <Grants_gov_table />,
+    noCollapse: true,
+  },
+  {
+    type: "collapse",
+    name: "Google_jobs",
+    key: "Google_jobs_table",
+    route: "/Google_jobs_table",
+    icon: <Office size="12px" />,
+    component: <Google_jobs_table />,
     noCollapse: true,
   },
   // { type: "title", title: "Account Pages", key: "account-pages" },

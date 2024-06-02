@@ -66,7 +66,7 @@ function dataFun() {
     limit: 10
   });
 
-  const baseURL = `https://lovely-boot-production.up.railway.app`
+  const baseURL = `https://dynamic-unity-production.up.railway.app`
 
   useEffect(() => {
     (async () => {
