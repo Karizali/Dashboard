@@ -100,10 +100,6 @@ function dataFun() {
     return {
       name: <Author name={`${eachData.name}`} />,
       address: <Function job={`${eachData.address}`} />,
-      status: (
-        // <SoftBadge variant="gradient" badgeContent="online" color="success" size="xs" container />
-        <Function job={`${eachData.status}`} />
-      ),
       phone: (
         <Function job={`${eachData.phone}`} />
       ),
@@ -112,6 +108,75 @@ function dataFun() {
           <Link target="_blank">{eachData.link}</Link>
         </SoftTypography>
       ),
+      email: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          <Link target="_blank">{eachData.email}</Link>
+        </SoftTypography>
+      ),
+      regular_hours: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.regular_hours}
+        </SoftTypography>
+      ),
+      claimed: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.claimed}
+        </SoftTypography>
+      ),
+      general_info: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.general_info}
+        </SoftTypography>
+      ),
+      services_products: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.services_products}
+        </SoftTypography>
+      ),
+      neighborhoods: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.neighborhoods}
+        </SoftTypography>
+      ),
+      amenities: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.amenities}
+        </SoftTypography>
+      ),
+      languages: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.languages}
+        </SoftTypography>
+      ),
+      aka: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.aka}
+        </SoftTypography>
+      ),
+      social_links: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.social_links}
+        </SoftTypography>
+      ),
+      categories: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.categories}
+        </SoftTypography>
+      ),
+      other_info: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.other_info}
+        </SoftTypography>
+      ),
+      other_links: (
+        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
+          {eachData.other_links}
+        </SoftTypography>
+      ),
+      status: (
+        // <SoftBadge variant="gradient" badgeContent="online" color="success" size="xs" container />
+        <Function job={`${eachData.status}`} />
+      ),
     }
   })
 
@@ -119,10 +184,22 @@ function dataFun() {
     columns: [
       { name: "name", align: "left" },
       { name: "address", align: "left" },
-      { name: "status", align: "center" },
       { name: "phone", align: "center" },
       { name: "link", align: "center" },
-      // { name: "action", align: "center" },
+      { name: "email", align: "left" },
+      { name: "regular_hours", align: "left" },
+      { name: "claimed", align: "left" },
+      { name: "general_info", align: "left" },
+      { name: "services_products", align: "left" },
+      { name: "neighborhoods", align: "left" },
+      { name: "amenities", align: "left" },
+      { name: "languages", align: "left" },
+      { name: "aka", align: "left" },
+      { name: "social_links", align: "left" },
+      { name: "categories", align: "left" },
+      { name: "other_info", align: "left" },
+      { name: "other_links", align: "left" },
+      { name: "status", align: "center" },
     ],
 
     rows: row,
