@@ -1,3 +1,4 @@
+
 /* eslint-disable react/prop-types */
 // Soft UI Dashboard React components
 import SoftBox from "components/SoftBox";
@@ -66,7 +67,7 @@ function dataFun() {
     limit: 10
   });
 
-  const baseURL = `https://lovely-boot-production.up.railway.app`
+  const baseURL = `https://dynamic-unity-production.up.railway.app`
 
   useEffect(() => {
     (async () => {
@@ -98,22 +99,19 @@ function dataFun() {
 
   const row = apiData.map((eachData, index) => {
     return {
-      "Opportunity Title": <Author name={`${eachData["Opportunity Title"]}`} />,
-      "Opportunity Number": (
-        <Function job={`${eachData["Opportunity Number"]}`} />
+      "Title": <Author name={`${eachData["title"]}`} />,
+      "Organization": (
+        <Function job={`${eachData["organization"]}`} />
       ),
-      "Opportunity Status": (
-        <Function job={`${eachData["Opportunity Status"]}`} />
+      "State": (
+        <Function job={`${eachData["state"]}`} />
       ),
-      url: (
-        <Function job={`${eachData.url}`} />
-      ),
-      "Posted Date": (
+      "Release Date": (
         <SoftTypography variant="caption" color="secondary" fontWeight="medium">
-          {eachData["Posted Date"]}
+          {eachData["release_date"]}
         </SoftTypography>
       ),
-      "Close Date": <Function job={`${eachData["Close Date"]}`} />,
+      "Due Date": <Function job={`${eachData["due_date"]}`} />,
       status: (
         <Function job={`${eachData.status}`} />
       ),
@@ -122,12 +120,10 @@ function dataFun() {
 
   const authorsTableData = {
     columns: [
-      { name: "Opportunity Title", align: "left" },
-      { name: "Opportunity Number", align: "left" },
-      { name: "Opportunity Status", align: "center" },
-      { name: "url", align: "center" },
-      { name: "Posted Date", align: "center" },
-      { name: "Close Date", align: "center" },
+      { name: "Title", align: "left" },
+      { name: "State", align: "left" },
+      { name: "Release Date", align: "center" },
+      { name: "Due Date", align: "center" },
       { name: "status", align: "center" },
     ],
 
@@ -149,4 +145,3 @@ dataFun.propTypes = {
 };
 
 export default dataFun;
-

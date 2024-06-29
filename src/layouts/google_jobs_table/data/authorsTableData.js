@@ -73,7 +73,7 @@ function dataFun() {
       // console.log(pageAndLimit.page,pageAndLimit.limit)
       setIsLoading(dispatch, true);
       try {
-        const response = await axios.get(`${baseURL}/scraper/grants_gov/paginate?page=${pageAndLimit.page}&limit=${pageAndLimit.limit}`, {
+        const response = await axios.get(`${baseURL}/scraper/google_jobs/paginate?page=${pageAndLimit.page}&limit=${pageAndLimit.limit}`, {
           headers: {
             'Content-Type': 'application/json'
           }
@@ -98,37 +98,23 @@ function dataFun() {
 
   const row = apiData.map((eachData, index) => {
     return {
-      "Opportunity Title": <Author name={`${eachData["Opportunity Title"]}`} />,
-      "Opportunity Number": (
-        <Function job={`${eachData["Opportunity Number"]}`} />
-      ),
-      "Opportunity Status": (
-        <Function job={`${eachData["Opportunity Status"]}`} />
-      ),
-      url: (
-        <Link target="_blank"> <Function job={`${eachData.url}`} /></Link>
-      ),
-      "Posted Date": (
-        <SoftTypography variant="caption" color="secondary" fontWeight="medium">
-          {eachData["Posted Date"]}
-        </SoftTypography>
-      ),
-      "Close Date": <Function job={`${eachData["Close Date"]}`} />,
-      status: (
-        <Function job={`${eachData.status}`} />
-      ),
+      "Title": <Author name={`${eachData["title"]}`} />,
+      "Company": <Function job={`${eachData["company"]}`} />,
+      "Location": <Function job={`${eachData["location"]}`} />,
+      "Via": <SoftTypography variant="caption" color="secondary" fontWeight="medium">{eachData["via"]}</SoftTypography>,
+      "Extensions": <Function job={`${eachData["extensions"]}`} />,
+      "Status": <Function job={`${eachData["status"]}`} />,
     }
   })
 
   const authorsTableData = {
     columns: [
-      { name: "Opportunity Title", align: "left" },
-      { name: "Opportunity Number", align: "left" },
-      { name: "Opportunity Status", align: "center" },
-      { name: "url", align: "center" },
-      { name: "Posted Date", align: "center" },
-      { name: "Close Date", align: "center" },
-      { name: "status", align: "center" },
+      { name: "Title", align: "left" },
+      { name: "Company", align: "left" },
+      { name: "Location", align: "center" },
+      { name: "Via", align: "center" },
+      { name: "Extensions", align: "center" },
+      { name: "Status", align: "center" },
     ],
 
     rows: row,

@@ -1,19 +1,3 @@
-/**
-=========================================================
-* Soft UI Dashboard React - v4.0.1
-=========================================================
-
-* Product Page: product/soft-ui-dashboard-react
-* Copyright 2023 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
-// prop-types is a library for typechecking of props
 import PropTypes from "prop-types";
 
 // @mui material components
@@ -101,10 +85,10 @@ function Footer({ company, links }) {
 Footer.defaultProps = {
   company: { href: "", name: "" },
   links: [
-    { href: "", name: "" },
-    { href: "", name: "About Us" },
-    { href: "", name: "Blog" },
-    { href: "", name: "License" },
+    // { href: "", name: "" },
+    // { href: "", name: "About Us" },
+    // { href: "", name: "Blog" },
+    // { href: "", name: "License" },
   ],
 };
 
